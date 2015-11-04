@@ -37,6 +37,7 @@ db.serialize(function() {
   stmt.finalize();
 });
 
+<<<<<<< HEAD
 // List all structures
 app.get('/list', function (req, res) {
   db.all("SELECT * FROM structures", function(err, row) {
@@ -47,3 +48,20 @@ app.get('/list', function (req, res) {
 
 // Listen on specified port
 var server = app.listen(portNo);
+=======
+// Listen on specified port
+var server = app.listen(portNo);
+
+// List all structures
+app.get('/list', function (req, res) {
+  var structs = [];
+  var i = 0;
+  db.each("SELECT * FROM structures", function(err, row) {
+    structs[i] = row.toString();
+    i++;
+    console.log(structs[i]);
+  });
+  console.log("Reached");
+  res.sendStatus(structs);
+});
+>>>>>>> 2fd7358d8c487ff0a5545ed27f71a23c8913e4ad
