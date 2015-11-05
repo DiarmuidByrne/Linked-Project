@@ -45,5 +45,13 @@ app.get('/list', function (req, res) {
   });
 });
 
+// List structure specified by id
+app.get('/struct/:id', function (req, res) {
+  db.all("SELECT * FROM structures WHERE id = " + req.params.id, function(err, row) {
+    rowString = JSON.stringify(row, null, '\t');
+    res.sendStatus(rowString);
+  });
+});
+
 // Listen on specified port
 var server = app.listen(portNo);
