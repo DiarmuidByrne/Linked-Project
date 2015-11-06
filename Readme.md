@@ -13,7 +13,7 @@ https://data.gov.ie/dataset/fingal-development-plan-2011-2017-record-of-protecte
 - A list of bus routes and stop times (Taken from the Dublinked open data bank)
 http://dublinked.com/datastore/datasets/dataset-254.php
 
-Both of the datasets are Specific to the Greater Dublin Area
+Both of the datasets are specific to the Greater Dublin area.
 
 ## Functionality
 The current plan for the datasets  is to take advantage of the latitudeinal and longitudinal values of both datasets to compare the closest bus routes and stops with a specific (or multiple) protected structure. If time permits, functionality will be added to display requested times for each bus stop to make the API more specific and useful to end users. 
