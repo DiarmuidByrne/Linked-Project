@@ -14,7 +14,6 @@ var portNo = 8000;
 // Listen on specified port
 var server = app.listen(portNo);
 //==================================
-
 //=======Structures Database========
 var structDB = new sqlite3.Database(':memory:');
 
@@ -40,7 +39,6 @@ structDB.serialize(function() {
 });
 
 //==================================
-
 // ========== HTTP Server ==========
 
 // Default message when user connects
@@ -89,10 +87,10 @@ stopDB.serialize(function() {
   stmtStop.finalize();
 
   for(var j=0; j<stopTime.length; j++) {
-    console.log("Stop time: " + stopTime[j].arrival_time + typeof(stopTime[j].arrival_time));
-    console.log("Stop Sequence: " + stopTime[j].stop_sequence);
-    console.log("Stop ID: " + stopTime[j].stop_id);
 
+    // Parse Stop_Times JSON objects
+    // Add Stop_Times column in stops table
+    // by comparing stop_id of both files
     var stmtTime = stopDB.run('UPDATE stops SET stop_time = "' + stopTime[j].arrival_time +
     '", stop_sequence = ' + stopTime[j].stop_sequence + ' WHERE stop_id LIKE "' + stopTime[j].stop_id + '"');
   }
