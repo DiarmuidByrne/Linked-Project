@@ -59,10 +59,10 @@ app.get('/', function (req, res) {
 
 var Structure = function(id, rps_no,structurename,description,streetnumber,streetaddress,townland,lat,long){
 	this.id = (id) ? id : 0;
-	this.rps_no = (rps_no) ? rps_no : "999";
+	this.rps_no = (rps_no) ? rps_no : "";
 	this.structurename = (structurename) ? structurename : "None";
 	this.description = (description) ? description : "None";
-	this.streetnumber = (streetnumber) ? streetnumber : "999";
+	this.streetnumber = (streetnumber) ? streetnumber : "None";
 	this.streetaddress = (streetaddress) ? streetaddress : "None";
 	this.townland = (townland) ? townland : "None";
   this.lat = (lat) ? lat : "0.0";
@@ -78,13 +78,13 @@ app.get('/list', function (req, res) {
   });
 });
 
-/*// List structure specified by id
+// List structure specified by id
 app.get('/structure/:id', function (req, res) {
   structDB.all("SELECT structurename, description, lat, long FROM structures WHERE id = " + req.params.id, function(err, row) {
     rowString = JSON.stringify(row, null, '\t');
     res.sendStatus(rowString);
   });
-*/
+});
 
 app.post('/structure', function (req, res) {
   var structID = (req.body.id) ? req.body.id:0;
@@ -93,12 +93,12 @@ app.post('/structure', function (req, res) {
       function(err, row) {
         var structure = new Structure (
         row.id, row.rps_no, row.structurename, row.description, row.streetnumber, row.streetaddress, row.townland, row.lat, row.long);
-        console.log(typeof(row));
+
         if(typeof(row) == "object") {
           return res.json(structure);
         } else {
           return res.json("Error");
-      }
+        }
     });
   });
 });
@@ -111,8 +111,8 @@ var stopLoc = JSON.parse(fs.readFileSync('Stops.json', 'utf8'));
 var stopTime = JSON.parse(fs.readFileSync('Stop_Times.json', 'utf8'));
 
 structDB.serialize(function() {
-  structDB.run('CREATE TABLE stops (id INTEGER PRIMARY KEY AUTOINCREMENT, stop_id TEXT, name TEXT, lat REAL, long REAL, stop_time TEXT, stop_sequence INTEGER)');
-  var stmtStop = structDB.prepare('INSERT INTO stops (stop_id,name,lat,long) VALUES (?,?,?,?)');
+  structDB.run('CREATE TABLE stops (id INTEGER PRIMARY KEY AUTOINCREMENT, stop_id TEXT, stop_name TEXT, stop_lat REAL, stop_long REAL, stop_time TEXT, stop_sequence INTEGER)');
+  var stmtStop = structDB.prepare('INSERT INTO stops (stop_id,stop_name,stop_lat,stop_long) VALUES (?,?,?,?)');
   console.log("Stops Table created");
   // Loop through each JSON object and add contents to database
   for(var i=0; i<stopLoc.length; i++) {
@@ -142,6 +142,13 @@ app.get('/stops', function (req, res) {
   });
 });
 
+var Stop = function(stop_name, stop_lat, stop_long, stop_time){
+	this.stop_name = (stop_name) ? stop_name : "None";
+	this.stop_lat = (stop_lat) ? stop_lat : "None";
+	this.stop_long = (stop_long) ? stop_long : "999";
+	this.stop_time = (stop_time) ? stop_time : "None";
+}
+
 // ================================================
 // ======= Join Tables To Compare locations =======
 
@@ -151,7 +158,8 @@ app.get('/compare/:id', function (req, res) {
   structDB.all("SELECT * FROM structures WHERE id = " + req.params.id, function (err, row) {
     structString = JSON.stringify(row, null, '\t');
   });
-  structDB.all("SELECT stops.long AS stop_long, stops.lat AS stop_Lat, stops.name AS stop_name FROM structures LEFT JOIN stops "
+  structDB.all("SELECT stops.stop_long AS stop_long, stops.stop_lat AS stop_Lat, stops.stop_name AS stop_name, stops.stop_time AS stop_time "
+  + "FROM structures LEFT JOIN stops "
   + "ON ROUND(structures.long, 2) = ROUND(stops.long, 2) AND ROUND(structures.lat, 2) = ROUND(stops.lat, 2)"
   + "WHERE structures.id = " + req.params.id, function(err, row) {
     rowString = JSON.stringify(row, null, '\t');
@@ -159,4 +167,42 @@ app.get('/compare/:id', function (req, res) {
   });
 });
 
+app.post('/compare', function(req, res) {
+  var structID = (req.body.id) ? req.body.id:0;
+  var stopArr = [];
+  var added = false;
+  var i=0;
+  structDB.serialize(function() {
+    structDB.each("SELECT * FROM structures WHERE id = " + structID, function(err, row) {
+      var structure = new Structure (
+      row.id, row.rps_no, row.structurename, row.description, row.streetnumber, row.streetaddress, row.townland, row.lat, row.long);
+
+    structDB.serialize(function() {
+      structDB.all("SELECT stops.stop_long AS stop_long, stops.stop_lat AS stop_lat, stops.stop_name AS stop_name, stops.stop_time AS stop_time "
+        + "FROM structures LEFT JOIN stops "
+        + "ON ROUND(structures.long, 2) = ROUND(stops.stop_long, 2) AND ROUND(structures.lat, 2) = ROUND(stops.stop_lat, 2)"
+        + "WHERE structures.id = " + structID, function(err, row) {
+
+          if(!added) {
+            row.forEach(function (row) {
+              var stop = new Stop (
+              row.stop_name, row.stop_lat, row.stop_long, row.stop_time);
+              stopArr[i]= stop;
+            })
+          }
+
+          if(!added) {
+            if(typeof(structure) == "object" && typeof(stopArr) == "object") {
+              var structStop = structure + structArr;
+              return res.json(structStop);
+              added=true;
+            } else {
+              return res.json("Error");
+            }
+          }
+        });
+      });
+    });
+   });
+ });
 // ===================== Fin ======================
