@@ -52,23 +52,19 @@ structDB.serialize(function() {
 // Default message when user connects
 app.get('/', function (req, res) {
   res.render('index.ejs');
-  /*res.send("This is the Protected Structures API."  +
-  "\nTry http://127.0.0.1:8000/list" +
-  "\n or http://127.0.0.1:8000/structure/<id>");*/
 });
 
 var Structure = function(id, rps_no,structurename,description,streetnumber,streetaddress,townland,lat,long){
-	this.id = (id) ? id : 0;
+  this.id = (id) ? id : 0;
 	this.rps_no = (rps_no) ? rps_no : "";
-	this.structurename = (structurename) ? structurename : "None";
-	this.description = (description) ? description : "None";
+  this.structurename = (structurename) ? structurename : "None";
+  this.description = (description) ? description : "None";
 	this.streetnumber = (streetnumber) ? streetnumber : "None";
 	this.streetaddress = (streetaddress) ? streetaddress : "None";
 	this.townland = (townland) ? townland : "None";
   this.lat = (lat) ? lat : "0.0";
   this.long = (long) ? long : "0.0";
 }
-
 
 // List all structures
 app.get('/list', function (req, res) {
@@ -94,6 +90,7 @@ app.post('/structure', function (req, res) {
         var structure = new Structure (
         row.id, row.rps_no, row.structurename, row.description, row.streetnumber, row.streetaddress, row.townland, row.lat, row.long);
 
+        console.log(structure.id);
         if(typeof(row) == "object") {
           return res.json(structure);
         } else {
@@ -155,54 +152,61 @@ var Stop = function(stop_name, stop_lat, stop_long, stop_time){
 // Compare selected structure with nearby bus stops using lat + long values
 var stuctString;
 app.get('/compare/:id', function (req, res) {
-  structDB.all("SELECT * FROM structures WHERE id = " + req.params.id, function (err, row) {
-    structString = JSON.stringify(row, null, '\t');
-  });
-  structDB.all("SELECT stops.stop_long AS stop_long, stops.stop_lat AS stop_Lat, stops.stop_name AS stop_name, stops.stop_time AS stop_time "
-  + "FROM structures LEFT JOIN stops "
-  + "ON ROUND(structures.long, 2) = ROUND(stops.long, 2) AND ROUND(structures.lat, 2) = ROUND(stops.lat, 2)"
-  + "WHERE structures.id = " + req.params.id, function(err, row) {
-    rowString = JSON.stringify(row, null, '\t');
-    res.sendStatus(structString + rowString);
+  structDB.serialize(function() {
+    structDB.all("SELECT * FROM structures WHERE id = " + req.params.id, function (err, row) {
+      structString = JSON.stringify(row, null, '\t');
+    });
+      structDB.all("SELECT stops.stop_long AS stop_long, stops.stop_lat AS stop_Lat, stops.stop_name AS stop_name, stops.stop_time AS stop_time "
+      + "FROM structures LEFT JOIN stops "
+      + "ON ROUND(structures.long, 2) = ROUND(stops.stop_long, 2) AND ROUND(structures.lat, 2) = ROUND(stops.stop_lat, 2)"
+      + "WHERE structures.id = " + req.params.id, function(err, row) {
+
+        rowString = JSON.stringify(row, null, '\t');
+        res.sendStatus("Structure: \n" + structString + "\nNearby Bus stops: " + rowString);
+    });
   });
 });
 
 app.post('/compare', function(req, res) {
   var structID = (req.body.id) ? req.body.id:0;
-  var stopArr = [];
-  var added = false;
-  var i=0;
-  structDB.serialize(function() {
-    structDB.each("SELECT * FROM structures WHERE id = " + structID, function(err, row) {
-      var structure = new Structure (
+  console.log("reached");
+  structDB.each("SELECT * FROM structures WHERE id = " + structID, function(err, row) {
+    console.log(row.id);
+    var newStruct = new Structure (
       row.id, row.rps_no, row.structurename, row.description, row.streetnumber, row.streetaddress, row.townland, row.lat, row.long);
 
     structDB.serialize(function() {
-      structDB.all("SELECT stops.stop_long AS stop_long, stops.stop_lat AS stop_lat, stops.stop_name AS stop_name, stops.stop_time AS stop_time "
-        + "FROM structures LEFT JOIN stops "
-        + "ON ROUND(structures.long, 2) = ROUND(stops.stop_long, 2) AND ROUND(structures.lat, 2) = ROUND(stops.stop_lat, 2)"
-        + "WHERE structures.id = " + structID, function(err, row) {
+      structDB.each("SELECT stops.stop_long AS stop_long, stops.stop_lat AS stop_lat, stops.stop_name AS stop_name, stops.stop_time AS stop_time "
+      + "FROM structures LEFT JOIN stops "
+      + "ON ROUND(structures.long, 1) = ROUND(stops.stop_long, 1) AND ROUND(structures.lat, 1) = ROUND(stops.stop_lat, 1) "
+      + "WHERE structures.id = " + structID + " LIMIT 1", function(err, row) {
 
-          if(!added) {
-            row.forEach(function (row) {
-              var stop = new Stop (
-              row.stop_name, row.stop_lat, row.stop_long, row.stop_time);
-              stopArr[i]= stop;
-            })
-          }
+        var stop = new Stop (
+        row.stop_name, row.stop_lat, row.stop_long, row.stop_time);
+        //stopArr[i]= stop;
 
-          if(!added) {
-            if(typeof(structure) == "object" && typeof(stopArr) == "object") {
-              var structStop = structure + structArr;
-              return res.json(structStop);
-              added=true;
-            } else {
-              return res.json("Error");
-            }
-          }
-        });
+        var linkedSet = new LinkedSet (
+          newStruct.id, newStruct.structurename, newStruct.description, newStruct.lat, newStruct.long, stop.stop_name, stop.stop_lat, stop.stop_long, stop.stop_time);
+
+        if(typeof(linkedSet) == "object" && linkedSet.struct_id <= structure.length && linkedSet.struct_id > 0) {
+          return res.json(linkedSet);
+        } else {
+          return res.json("Error");
+        }
       });
     });
-   });
+  });
+
+  var LinkedSet = function(struct_id, struct_name, struct_desc, struct_lat, struct_long, stop_name, stop_lat, stop_long, stop_time){
+    this.struct_id = (struct_id) ? struct_id : 0;
+    this.struct_name = (struct_name) ? struct_name : "None";
+    this.struct_desc = (struct_desc) ? struct_desc : "None";
+    this.struct_lat = (struct_lat) ? struct_lat : 0.0;
+    this.struct_long = (struct_long) ? struct_long : 0.0;
+  	this.stop_name = (stop_name) ? stop_name : "None";
+  	this.stop_lat = (stop_lat) ? stop_lat : 0.0;
+  	this.stop_long = (stop_long) ? stop_long : 0.0;
+  	this.stop_time = (stop_time) ? stop_time : "None";
+  }
  });
 // ===================== Fin ======================
