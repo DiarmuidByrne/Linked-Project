@@ -11,12 +11,13 @@ var structure = JSON.parse(fs.readFileSync('Structures.json', 'utf8'));
 
 // =========== Initialize HTTP Server =============
 var app = express();
-app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); //
+app.use(bodyParser.json()); // Initialize JSON parser with Express
+app.use(bodyParser.urlencoded({ extended: true }));
 
-var portNo = 8000;
 // Listen on specified port
+var portNo = 8000;
 var server = app.listen(portNo);
+
 // ================================================
 // ============= Structures Database ==============
 var structDB = new sqlite3.Database(':memory:');
@@ -51,7 +52,7 @@ structDB.serialize(function() {
 
 // Default message when user connects
 app.get('/', function (req, res) {
-  res.render('index.ejs');
+  res.render('Structures.ejs');
 });
 
 var Structure = function(id, rps_no,structurename,description,streetnumber,streetaddress,townland,lat,long){
@@ -131,7 +132,7 @@ structDB.serialize(function() {
   }
 });
 
-// Default message when user connects
+// Display list of second dataset
 app.get('/stops', function (req, res) {
   structDB.all("SELECT * FROM stops", function(err, row) {
     rowString = JSON.stringify(row, null, '\t');
@@ -139,6 +140,7 @@ app.get('/stops', function (req, res) {
   });
 });
 
+// Create object to hold SQL query result
 var Stop = function(stop_name, stop_lat, stop_long, stop_time){
 	this.stop_name = (stop_name) ? stop_name : "None";
 	this.stop_lat = (stop_lat) ? stop_lat : "None";
@@ -167,11 +169,22 @@ app.get('/compare/:id', function (req, res) {
   });
 });
 
+// Object to take in data from both datasets
+var LinkedSet = function(struct_id, struct_name, struct_desc, struct_lat, struct_long, stop_name, stop_lat, stop_long, stop_time){
+  this.struct_id = (struct_id) ? struct_id : 0;
+  this.struct_name = (struct_name) ? struct_name : "None";
+  this.struct_desc = (struct_desc) ? struct_desc : "None";
+  this.struct_lat = (struct_lat) ? struct_lat : 0.0;
+  this.struct_long = (struct_long) ? struct_long : 0.0;
+  this.stop_name = (stop_name) ? stop_name : "None";
+  this.stop_lat = (stop_lat) ? stop_lat : 0.0;
+  this.stop_long = (stop_long) ? stop_long : 0.0;
+  this.stop_time = (stop_time) ? stop_time : "None";
+}
+
 app.post('/compare', function(req, res) {
   var structID = (req.body.id) ? req.body.id:0;
-  console.log("reached");
   structDB.each("SELECT * FROM structures WHERE id = " + structID, function(err, row) {
-    console.log(row.id);
     var newStruct = new Structure (
       row.id, row.rps_no, row.structurename, row.description, row.streetnumber, row.streetaddress, row.townland, row.lat, row.long);
 
@@ -183,11 +196,11 @@ app.post('/compare', function(req, res) {
 
         var stop = new Stop (
         row.stop_name, row.stop_lat, row.stop_long, row.stop_time);
-        //stopArr[i]= stop;
 
         var linkedSet = new LinkedSet (
           newStruct.id, newStruct.structurename, newStruct.description, newStruct.lat, newStruct.long, stop.stop_name, stop.stop_lat, stop.stop_long, stop.stop_time);
 
+        // Send objects to EJS file Else display error
         if(typeof(linkedSet) == "object" && linkedSet.struct_id <= structure.length && linkedSet.struct_id > 0) {
           return res.json(linkedSet);
         } else {
@@ -196,17 +209,19 @@ app.post('/compare', function(req, res) {
       });
     });
   });
+});
 
-  var LinkedSet = function(struct_id, struct_name, struct_desc, struct_lat, struct_long, stop_name, stop_lat, stop_long, stop_time){
-    this.struct_id = (struct_id) ? struct_id : 0;
-    this.struct_name = (struct_name) ? struct_name : "None";
-    this.struct_desc = (struct_desc) ? struct_desc : "None";
-    this.struct_lat = (struct_lat) ? struct_lat : 0.0;
-    this.struct_long = (struct_long) ? struct_long : 0.0;
-  	this.stop_name = (stop_name) ? stop_name : "None";
-  	this.stop_lat = (stop_lat) ? stop_lat : 0.0;
-  	this.stop_long = (stop_long) ? stop_long : 0.0;
-  	this.stop_time = (stop_time) ? stop_time : "None";
-  }
- });
+  app.post('/add', function(req, res) {
+    var newStruct = new Structure (
+      req.body.structId, req.body.rps_no, req.body.structurename, req.body.description, req.body.streetnumber, req.body.streetaddress, req.body.townland, req.body.lat, req.body.long);
+
+    var stmt = structDB.prepare("INSERT into structures"
+      + " ('rps_no', 'structurename', 'description', 'streetnumber', 'streetaddress', 'townland', 'lat', 'long') "
+      + " VALUES"
+      + " (?,?,?,?,?,?,?,?)");
+
+    stmt.run(newStruct.rps_no, newStruct.structurename, newStruct.description, newStruct.streetnumber, newStruct.streetaddress, newStruct.townland, newStruct.lat, newStruct.long);
+
+    // Send objects to EJS file Else display Error message
+  });
 // ===================== Fin ======================

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Structures</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="/js/index.js"></script>
+    <link rel="stylesheet" type="text/css" href="theme.css">
+
+  </head>
+
+  <body>
+    <script>
+    $(document).ready(function(){
+      $("#showButton").click(function(){
+        if ($.isNumeric($("#showStructures").val())){
+          $.ajax({
+            url: '/compare',
+            type: 'POST',
+            data: 'id=' + $("#showStructures").val(),
+            success: function(data) {
+              var msg = "";
+              if (data == "Error"){
+                  msg= "No structure with that ID";
+                  alert(msg);
+              }
+              else {
+                msg = "Structure id:" + data.struct_id + "<br/>"
+                    + "Name : " + data.struct_name + "<br/>"
+                    + "Description : " + data.struct_desc + "<br/>"
+                    + "Street No : " + data.struct_lat + "<br/>"
+                    + "Address : " + data.struct_long + "<br/>"
+                    + "Stop name : " + data.stop_name + "<br/>"
+                    + "Stop lat : " + data.stop_lat + "<br/>"
+                    + "Stop long : " + data.stop_long + "<br/>"
+                    + "Stop time : " + data.stop_time + "<br/>"
+                $("#dialog-text").html(msg);
+                $("#dialog").dialog("open");
+              }
+            }
+          });
+        }
+      });
+
+      $("#insertButton").click(function(){
+        if ($.isNumeric($("#insertStructure").val())){
+          $.ajax({
+            url: '/add',
+            type: 'POST',
+            data: 'id=' + $("#addStructID").val(),
+                  //'rps_no' + $()
+
+            success: function(data) {
+              var msg = "";
+              if (data == "Error"){
+                  msg= "ID already exists";
+                  alert(msg);
+              }
+              else {
+                msg = "Structure id:" + data.struct_id + "<br/>"
+                    + "Name : " + data.struct_name + "<br/>"
+                    + "Description : " + data.struct_desc + "<br/>"
+                    + "Street No : " + data.struct_lat + "<br/>"
+                    + "Address : " + data.struct_long + "<br/>"
+                    + "Stop name : " + data.stop_name + "<br/>"
+                    + "Stop lat : " + data.stop_lat + "<br/>"
+                    + "Stop long : " + data.stop_long + "<br/>"
+                    + "Stop time : " + data.stop_time + "<br/>"
+                $("#dialog-text").html(msg);
+                $("#dialog").dialog("open");
+              }
+            }
+          });
+        }
+      });
+
+
+    });
+    </script>
+    <h1>Structures API.</h1>
+    <h2>This is the Scructures API.</h2><br>
+
+    <h3 class="heading">Select structure</h3>
+      <div class="container round-container align-left">
+        <div class="">
+          <p>Select Structure ID (1-792): <input type="text" id="showStructures"></p>
+          <Button id="showButton">Show ID</Button>
+        </div>
+    </div>
+
+    <div class="container round-container align-right">
+
+      <h3 class="heading">Add a structure</h3>
+
+      <div class="container">
+        <div class="row">
+          <div class="addStruct">rps_no: <input id="addRps" type="float" name="rps"></div>
+        </div>
+
+        <div class="row">
+          <div class="addStruct">structurename: <input id="addName" type="text" name="name"></div>
+        </div>
+
+        <div class="row">
+          <div class="addStruct">description: <input id="addDesc" type="text" name="description"></div>
+        </div>
+
+        <div class="row">
+          <div class="addStruct">streetnumber: <input id="addNumber" type="int" name="number"></div>
+        </div>
+
+        <div class="row">
+          <div class="addStruct">streetaddress <input id="addAddress" type="text" name="address" ></div>
+        </div>
+
+        <div class="row">
+          <div class="addStruct">Town: <input id="addTown" type="text" name="town"></div>
+        </div>
+
+        <div class="row">
+          <div class="addStruct">Latitude: <input id="addLat" type="float" name="lat"></div>
+        </div>
+
+        <div class="row">
+          <div class="addStruct">Longitude: <input id="addLong" type="float" name="long"></div>
+        </div>
+
+    <div id="dialog" title="Structure">
+      <div id="dialog-text" class="align-left"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
