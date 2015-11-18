@@ -6,16 +6,14 @@
 
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="/js/index.js"></script>
-    <link rel="stylesheet" type="text/css" href="theme.css">
 
   </head>
 
   <body>
     <script>
     $(document).ready(function(){
+
 
       // Shows structure with given ID + nearby bus stop
       $("#showButton").click(function(){
@@ -68,6 +66,11 @@
               $("#dialog").dialog("open");
             }
           });
+        } else {
+          var msg = "";
+          msg = "Invalid Input"
+          $("#dialog-text").html(msg);
+          $("#dialog").dialog("open");
         }
       });
     });
@@ -90,35 +93,35 @@
 
       <div class="container">
           <div class="row">
-            <div class="addStruct">rps_no: <input id="addRps" type="text"></div>
+            <p><div class="addStruct">rps_no:   <input id="addRps" type="text"></div>
           </div>
 
           <div class="row">
-            <div class="addStruct">structurename: <input id="addName" type="text"></div>
+            <div class="addStruct">structurename:  <input id="addName" type="text"></div>
           </div>
 
           <div class="row">
-            <div class="addStruct">description: <input id="addDesc" type="text"></div>
+            <div class="addStruct">description:   <input id="addDesc" type="text"></div>
           </div>
 
           <div class="row">
-            <div class="addStruct">streetnumber: <input id="addNumber" type="text"></div>
+            <div class="addStruct">streetnumber:   <input id="addNumber" type="text"></div>
           </div>
 
           <div class="row">
-            <div class="addStruct">streetaddress <input id="addAddress" type="text" ></div>
+            <div class="addStruct">streetaddress:   <input id="addAddress" type="text" ></div>
           </div>
 
           <div class="row">
-            <div class="addStruct">Town: <input id="addTown" type="text"></div>
+            <div class="addStruct">Town:   <input id="addTown" type="text"></div>
           </div>
 
           <div class="row">
-            <div class="addStruct">Latitude: <input id="addLat" type="text"></div>
+            <div class="addStruct">Latitude:   <input id="addLat" type="text"></div>
           </div>
 
           <div class="row">
-            <div class="addStruct">Longitude: <input id="addLong" type="text"></div>
+            <div class="addStruct">Longitude:    <input id="addLong" type="text"></div></p>
           </div>
 
           <Button id="insertButton">Insert</button>

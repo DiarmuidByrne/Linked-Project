@@ -1,0 +1,31 @@
+{
+  "name": "linked-project",
+  "version": "1.0.0",
+  "description": "Linked Data project",
+  "main": "Structures.js",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "ejs": "^2.3.4",
+    "express": "^4.13.3",
+    "sqlite3": "^3.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diarmuidbyrne/linked-project.git"
+  },
+  "keywords": [
+    "linked",
+    "structures",
+    "bus-stops"
+  ],
+  "author": "Diarmuid Byrne (G00302711@gmit.ie)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/diarmuidbyrne/linked-project/issues"
+  },
+  "homepage": "https://github.com/diarmuidbyrne/linked-project#readme"
+}

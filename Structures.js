@@ -6,6 +6,7 @@ var router = express.Router();
 var fs = require('fs');
 var sqlite3 = require('sqlite3').verbose();
 var bodyParser = require('body-parser');
+
 // Read in Structures file and parse to JSON
 var structure = JSON.parse(fs.readFileSync('Structures.json', 'utf8'));
 
@@ -83,24 +84,6 @@ app.get('/structure/:id', function (req, res) {
   });
 });
 
-app.post('/structure', function (req, res) {
-  var structID = (req.body.id) ? req.body.id:0;
-  structDB.serialize(function() {
-    structDB.each("SELECT * FROM structures WHERE id = " + structID,
-      function(err, row) {
-        var structure = new Structure (
-        row.id, row.rps_no, row.structurename, row.description, row.streetnumber, row.streetaddress, row.townland, row.lat, row.long);
-
-        console.log(structure.id);
-        if(typeof(row) == "object") {
-          return res.json(structure);
-        } else {
-          return res.json("Error");
-        }
-    });
-  });
-});
-
 //================================================
 //================ Bus Stops Table ===============
 
@@ -140,12 +123,12 @@ app.get('/stops', function (req, res) {
   });
 });
 
-// Create object to hold SQL query result
+// Create object to hold SQL query row
 var Stop = function(stop_name, stop_lat, stop_long, stop_time){
-	this.stop_name = (stop_name) ? stop_name : "None";
-	this.stop_lat = (stop_lat) ? stop_lat : "None";
-	this.stop_long = (stop_long) ? stop_long : "999";
-	this.stop_time = (stop_time) ? stop_time : "None";
+	this.stop_name = (stop_name) ? stop_name : "None nearby";
+	this.stop_lat = (stop_lat) ? stop_lat : "";
+	this.stop_long = (stop_long) ? stop_long : "";
+	this.stop_time = (stop_time) ? stop_time : "";
 }
 
 // ================================================
@@ -176,12 +159,15 @@ var LinkedSet = function(struct_id, struct_name, struct_desc, struct_lat, struct
   this.struct_desc = (struct_desc) ? struct_desc : "None";
   this.struct_lat = (struct_lat) ? struct_lat : 0.0;
   this.struct_long = (struct_long) ? struct_long : 0.0;
-  this.stop_name = (stop_name) ? stop_name : "None";
-  this.stop_lat = (stop_lat) ? stop_lat : 0.0;
-  this.stop_long = (stop_long) ? stop_long : 0.0;
-  this.stop_time = (stop_time) ? stop_time : "None";
+  this.stop_name = (stop_name) ? stop_name : "None Nearby";
+  this.stop_lat = (stop_lat) ? stop_lat : 0;
+  this.stop_long = (stop_long) ? stop_long : 0;
+  this.stop_time = (stop_time) ? stop_time : "";
 }
 
+// When "Show Structure" HTML button is called Gets structure by given ID
+// Compares Lat and long values stops table to get nearest bus stop and
+// outputs to the browser
 app.post('/compare', function(req, res) {
   var structID = (req.body.id) ? req.body.id:0;
   structDB.each("SELECT * FROM structures WHERE id = " + structID, function(err, row) {
@@ -200,6 +186,7 @@ app.post('/compare', function(req, res) {
         var linkedSet = new LinkedSet (
           newStruct.id, newStruct.structurename, newStruct.description, newStruct.lat, newStruct.long, stop.stop_name, stop.stop_lat, stop.stop_long, stop.stop_time);
 
+        console.log("Structure length:" + structure.length);
         // Send objects to EJS file Else display error
         if(typeof(linkedSet) == "object" && linkedSet.struct_id <= structure.length && linkedSet.struct_id > 0) {
           return res.json(linkedSet);
@@ -233,7 +220,7 @@ app.post('/add', function(req, res) {
 
   stmt.run(newStruct.rps_no, newStruct.structurename, newStruct.description, newStruct.streetnumber, newStruct.streetaddress, newStruct.townland, newStruct.lat, newStruct.long);
   console.log("New Structure added");
-  // Send objects to EJS file Else display Error message
+  structure[structure.length+1] = " ";
 });
 
 // ===================== Fin ======================
