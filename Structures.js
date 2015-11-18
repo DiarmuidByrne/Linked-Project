@@ -211,17 +211,29 @@ app.post('/compare', function(req, res) {
   });
 });
 
-  app.post('/add', function(req, res) {
-    var newStruct = new Structure (
-      req.body.structId, req.body.rps_no, req.body.structurename, req.body.description, req.body.streetnumber, req.body.streetaddress, req.body.townland, req.body.lat, req.body.long);
-
-    var stmt = structDB.prepare("INSERT into structures"
-      + " ('rps_no', 'structurename', 'description', 'streetnumber', 'streetaddress', 'townland', 'lat', 'long') "
-      + " VALUES"
-      + " (?,?,?,?,?,?,?,?)");
-
-    stmt.run(newStruct.rps_no, newStruct.structurename, newStruct.description, newStruct.streetnumber, newStruct.streetaddress, newStruct.townland, newStruct.lat, newStruct.long);
-
-    // Send objects to EJS file Else display Error message
+// Deletes Structure with given ID
+app.get('/remove/:id', function (req, res) {
+  var structID = req.params.id;
+  var stmt = structDB.run("DELETE FROM structures"
+    + " WHERE id = " + structID, function(err, row) {
+      res.send("Structure with ID " + structID + " deleted");
+    });
   });
+
+// Add New Row to Database using EJS data
+app.post('/add', function(req, res) {
+  var temp = 999;
+  var newStruct = new Structure (
+    temp, req.body.rps_no, req.body.structurename, req.body.description, req.body.streetnumber, req.body.streetaddress, req.body.townland, req.body.lat, req.body.long);
+
+  var stmt = structDB.prepare("INSERT into structures"
+    + " ('rps_no', 'structurename', 'description', 'streetnumber', 'streetaddress', 'townland', 'lat', 'long') "
+    + " VALUES"
+    + " (?,?,?,?,?,?,?,?)");
+
+  stmt.run(newStruct.rps_no, newStruct.structurename, newStruct.description, newStruct.streetnumber, newStruct.streetaddress, newStruct.townland, newStruct.lat, newStruct.long);
+  console.log("New Structure added");
+  // Send objects to EJS file Else display Error message
+});
+
 // ===================== Fin ======================
