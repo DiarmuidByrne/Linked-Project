@@ -9503,16 +9503,4 @@
     "Lat":53.48999222,
     "Long":-6.096908027
   },
-  {
-    "RPS_Number":793,
-    "StructureName":"one",
-    "Description":"two",
-    "StreetNumber":"three",
-    "StreetAddress":"four",
-    "Townland":"five",
-    "NIAH_Ref":"six",
-    "RMP_REF":"seven",
-    "Lat":8.123,
-    "Long":9.456
-  }
 ]
