@@ -45,6 +45,7 @@ structDB.serialize(function() {
           );
   }
   stmt.finalize();
+  console.log("Structures table created");
 });
 
 
@@ -83,6 +84,7 @@ app.get('/structure/:id', function (req, res) {
     res.sendStatus(rowString);
   });
 });
+
 
 //================================================
 //================ Bus Stops Table ===============
@@ -186,12 +188,11 @@ app.post('/compare', function(req, res) {
         var linkedSet = new LinkedSet (
           newStruct.id, newStruct.structurename, newStruct.description, newStruct.lat, newStruct.long, stop.stop_name, stop.stop_lat, stop.stop_long, stop.stop_time);
 
-        console.log("Structure length:" + structure.length);
         // Send objects to EJS file Else display error
-        if(typeof(linkedSet) == "object" && linkedSet.struct_id <= structure.length && linkedSet.struct_id > 0) {
+        if(typeof(linkedSet) == "object" && newStruct.id <= structure.length && newStruct.id > 0) {
           return res.json(linkedSet);
         } else {
-          return res.json("Error");
+          return res.send("Error");
         }
       });
     });
@@ -206,6 +207,15 @@ app.get('/remove/:id', function (req, res) {
       res.send("Structure with ID " + structID + " deleted");
     });
   });
+
+  // Deletes Structure with given ID
+  app.post('/remove/', function (req, res) {
+    var structID = req.body.id;
+    var stmt = structDB.run("DELETE FROM structures"
+      + " WHERE id = " + structID, function(err, row) {
+        res.send("Structure with ID " + structID + " deleted");
+      });
+    });
 
 // Add New Row to Database using EJS data
 app.post('/add', function(req, res) {
