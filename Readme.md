@@ -36,3 +36,14 @@ Alternatively, The API can be used by requesting these links:
 
 ## Expansion
 This project has been built around the possibility of expansion. Variables that control JSON parsing are all dynamically linked to the size of the datasets at runtime. This can be shown by adding a structure with the insert statement and displaying it by using the link 127.0.0.1:8000/list.
+
+## References
+This project has some cases of borrowed code, either from other open projects or tutorials.
+Since I was new to using JQuery and AJAX, I got the queries to support these with code I found from an open GitHub project.
+<b><i>https://github.com/VMarisevs/diamond-api </i></b>
+I also followed multiple examples and tutorials on W3schools to help with more specific problems, such as Database inserts using AJAX.
+<b><i>http://www.w3schools.com/jquery </i></b>
+Other references include:
+ - [Git cheat sheet](https://training.github.com/kit/downloads/github-git-cheat-sheet.pdf)
+ - [Markdown cheat sheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
+ - [CSV management](http://blogs.technet.com/b/heyscriptingguy/archive/2011/10/17/easily-remove-columns-from-a-csv-file-by-using-powershell.aspx)
