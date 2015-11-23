@@ -47,3 +47,4 @@ Since I was new to using JQuery and AJAX, I got the queries to support these wit
  - [Git cheat sheet](https://training.github.com/kit/downloads/github-git-cheat-sheet.pdf)
  - [Markdown cheat sheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
  - [CSV management](http://blogs.technet.com/b/heyscriptingguy/archive/2011/10/17/easily-remove-columns-from-a-csv-file-by-using-powershell.aspx)
+ - [SQLITE3 github page](https://github.com/mapbox/node-sqlite3)
