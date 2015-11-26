@@ -1,5 +1,5 @@
 #Linked Data Project 2015
-*** By Diarmuid Byrne ***
+###***By Diarmuid Byrne***
 
 ## Introduction
 As required in the task described in the project brief, this project parses two separate datasets and links them by queries in order to make
@@ -13,26 +13,34 @@ https://data.gov.ie/dataset/fingal-development-plan-2011-2017-record-of-protecte
 - Two files containing a list of bus routes and stop times (Taken from the Dublinked open data bank)
 http://dublinked.com/datastore/datasets/dataset-254.php
 
-Both of the datasets are specific to the Greater Dublin area. However, this API could be expanded to cater for a larger area.
+In order to make both datasets usable, I had to delete multiple irrelevant columns from the Bus Stop files before converting them to JSON. The Stop_Times file had a lot of redundancy errors, with the file ending up at nearly 1 million entries. To cut it down to a usable size, I took the Stop_ID column as a primary key and deleted all duplicate entries. This brought the file to a much more useable 5,000 entries.
+
+Both of the datasets are specific to the Greater Dublin area.
 
 ## Functionality
 The API takes advantage of the latitudinal and longitudinal values of both datasets in order to compare the closest bus stops with a specific structure.
 
 Accessing the root link <i><b>(127.0.0.1:8000/)</i></b> brings the user to a GUI powered by HTML.
-The user can then either:
- - Show a structure by a given ID. It will also show a nearby bus stop by comparing the latitude and longitude values.
- - Delete a structure with ID that was entered
- - Insert a new structure with an Auto-incrementing primary ID.
+![Alt text](http://i.imgur.com/RnACFDk.png "Rendered EJS at Root")
+Here is a screenshot of the root link, which utilizes an EJS file. This file allows the primary functions of the API to run without needing to refresh the page. From here you can add or remove a structure by ID. You can also use a structure ID to find a bus stop in the area, if any are nearby.
 
 Alternatively, The API can be used by requesting these links:
  - <b>127.0.0.1:8000/list</b>
-</br>This lists each structure in plain text
+</br>This lists each structure in plain text. The structures are in JSON format, and are displayed like so:
+![Alt text](http://i.imgur.com/4s2TB8v.png "Example structure")
  - <b>127.0.0.1:8000/stops</b>
+![Alt text](http://i.imgur.com/Kp1mEyb.png "Example stop")
 </br>Similar to the previous query, but it lists the bus stop locations instead
  - <b>127.0.0.1:8000/compare/(id)</b>
 </br>Lists the structure by the given ID, and shows nearby bus stops followed by the times the bus stops in the area.
-</br>example: <b><i>127.0.0.1:8000/compare/5</i></b>
-</br>returns information on the structure with ID 5.
+</br>example: <b><i>127.0.0.1:8000/compare/5</i></b> would return:
+![Alt text](http://i.imgur.com/z22IZ58.png "Example stop")
+
+## Code Exerpts
+![Alt text](http://i.imgur.com/tlrwzCd.png "Example structure")
+Here is an example of one of the JQuery functions. It uses AJAX to insert a new Structure with the given information that was input into the textboxes.
+![Alt text](http://i.imgur.com/fe5Vnpf.png "Stop Times update")
+Due to the Bus stop datasets having separate files for Lat/long values and stop times, I used this query to update the already existing Stops table to add the times column.
 
 ## Expansion
 This project has been built around the possibility of expansion. Variables that control JSON parsing are all dynamically linked to the size of the datasets at runtime. This can be shown by adding a structure with the insert statement and displaying it by using the link 127.0.0.1:8000/list.
